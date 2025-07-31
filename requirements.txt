@@ -2,3 +2,4 @@ requests==2.31.0
 python-dateutil==2.8.2
 tabulate==0.9.0
 colorama==0.4.6
+# tkinter ingår vanligtvis i Python-installationen

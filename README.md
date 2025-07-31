@@ -1,6 +1,6 @@
 # Utgiftshanterare
 
-Ett Python-program för att hantera utgifter och splitta dem mellan deltagare i grupper. Programmet stöder flera valutor och hämtar aktiva växelkurser från API.
+Ett Python-program för att hantera utgifter och splitta dem mellan deltagare i grupper. Programmet stöder flera valutor och hämtar aktiva växelkurser från API. Nu med GUI och databashantering!
 
 ## Funktioner
 
@@ -12,6 +12,9 @@ Ett Python-program för att hantera utgifter och splitta dem mellan deltagare i 
 - **Saldoberäkning**: Visa saldon för alla deltagare
 - **Optimala överföringar**: Beräkna rekommenderade överföringar för att balansera gruppen
 - **Datahantering**: Spara och ladda gruppdata till/från filer
+- **GUI-gränssnitt**: Moderat och användarvänligt grafiskt gränssnitt med tkinter
+- **Databashantering**: SQLite-databas för persistent lagring av all data
+- **Dual-läge**: Välj mellan GUI och terminal-läge
 
 ## Installation
 
@@ -25,10 +28,24 @@ Ett Python-program för att hantera utgifter och splitta dem mellan deltagare i 
 
 Kör programmet:
 ```bash
-python expense_manager.py
+python main.py
 ```
 
-### Huvudmeny
+Programmet låter dig välja mellan:
+1. **GUI-läge**: Grafiskt gränssnitt med flikar för olika funktioner
+2. **Terminal-läge**: Kommandoradsbaserat gränssnitt
+
+### GUI-läge
+
+GUI-läget erbjuder ett modernt gränssnitt med flikar:
+
+- **Grupphantering**: Skapa, redigera och ta bort grupper
+- **Deltagare**: Hantera deltagare i vald grupp med CRUD-operationer
+- **Utgifter**: Lägg till, redigera och ta bort utgifter med formulär
+- **Saldon**: Visa saldon och rekommenderade överföringar i realtid
+- **Statistik**: Gruppstatistik och export-funktioner
+
+### Terminal-läge
 
 Programmet har en interaktiv meny med följande alternativ:
 
