@@ -1,0 +1,48 @@
+# Grundläggande beroenden
+requests==2.31.0
+python-dateutil==2.8.2
+tabulate==0.9.0
+colorama==0.4.6
+
+# Export-funktioner (Fas 1)
+pandas==2.1.4
+openpyxl==3.1.2
+reportlab==4.0.7
+
+# Statistik och grafer (Fas 2)
+matplotlib==3.8.2
+seaborn==0.13.0
+numpy==1.24.3
+
+# Schemalagd backup (Fas 2)
+schedule==1.2.0
+
+# Cloud-synkronisering (Fas 3)
+# requests ingår redan ovan
+uuid==1.30
+
+# AI och maskininlärning (Fas 3)
+scikit-learn==1.3.2
+scipy==1.11.4
+
+# Avancerad rapportering (Fas 3)
+# matplotlib och numpy ingår redan ovan
+
+# Mobil-app stöd (Fas 3 - för framtida implementation)
+# react-native (JavaScript/TypeScript) - inte Python-baserat
+# flutter (Dart) - inte Python-baserat
+
+# Inbyggda Python-moduler (krävs inte installation)
+# tkinter - ingår vanligtvis i Python-installationen
+# sqlite3 - ingår vanligtvis i Python-installationen
+# json - ingår vanligtvis i Python-installationen
+# os - ingår vanligtvis i Python-installationen
+# datetime - ingår vanligtvis i Python-installationen
+# threading - ingår vanligtvis i Python-installationen
+# time - ingår vanligtvis i Python-installationen
+# zipfile - ingår vanligtvis i Python-installationen
+# hashlib - ingår vanligtvis i Python-installationen
+# dataclasses - ingår vanligtvis i Python-installationen
+# enum - ingår vanligtvis i Python-installationen
+# csv - ingår vanligtvis i Python-installationen
+# pickle - ingår vanligtvis i Python-installationen
