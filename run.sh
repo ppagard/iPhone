@@ -17,4 +17,4 @@ pip install -r requirements.txt
 
 # Kör programmet
 echo "Startar programmet..."
-python expense_manager.py
+python main.py

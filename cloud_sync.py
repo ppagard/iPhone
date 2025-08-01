@@ -570,3 +570,13 @@ def show_sync_status():
     """Visar synkroniseringsstatus"""
     # Här skulle vi normalt visa detaljerad status
     print("Synkroniseringsstatus: Ej implementerad i denna version")
+
+def check_cloud_availability() -> bool:
+    """Kontrollerar om cloud-synkronisering är tillgänglig"""
+    try:
+        # Kontrollera om nätverksanslutning finns
+        import requests
+        response = requests.get("https://httpbin.org/get", timeout=5)
+        return response.status_code == 200
+    except:
+        return False
