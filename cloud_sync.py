@@ -57,39 +57,38 @@ class CloudSyncManager:
     def setup_local_sync_db(self):
         """Sätter upp lokal synkroniseringsdatabas"""
         try:
-            conn = sqlite3.connect("sync.db")
-            cursor = conn.cursor()
-            
-            # Skapa synkroniseringslogg
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS sync_log (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    sync_id TEXT UNIQUE,
-                    table_name TEXT NOT NULL,
-                    record_id INTEGER NOT NULL,
-                    data TEXT NOT NULL,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    device_id TEXT NOT NULL,
-                    status TEXT NOT NULL,
-                    hash TEXT NOT NULL,
-                    server_timestamp DATETIME,
-                    conflict_resolved BOOLEAN DEFAULT FALSE
-                )
-            ''')
-            
-            # Skapa index för snabbare sökningar
-            cursor.execute('''
-                CREATE INDEX IF NOT EXISTS idx_sync_status 
-                ON sync_log(status)
-            ''')
-            
-            cursor.execute('''
-                CREATE INDEX IF NOT EXISTS idx_sync_table_record 
-                ON sync_log(table_name, record_id)
-            ''')
-            
-            conn.commit()
-            conn.close()
+            with sqlite3.connect("sync.db") as conn:
+                cursor = conn.cursor()
+                
+                # Skapa synkroniseringslogg
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS sync_log (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        sync_id TEXT UNIQUE,
+                        table_name TEXT NOT NULL,
+                        record_id INTEGER NOT NULL,
+                        data TEXT NOT NULL,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        device_id TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        hash TEXT NOT NULL,
+                        server_timestamp DATETIME,
+                        conflict_resolved BOOLEAN DEFAULT FALSE
+                    )
+                ''')
+                
+                # Skapa index för snabbare sökningar
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_sync_status 
+                    ON sync_log(status)
+                ''')
+                
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_sync_table_record 
+                    ON sync_log(table_name, record_id)
+                ''')
+                
+                conn.commit()
             
         except Exception as e:
             print(f"Fel vid uppsättning av synkroniseringsdatabas: {e}")
@@ -156,33 +155,32 @@ class CloudSyncManager:
     def get_local_changes(self) -> List[SyncItem]:
         """Hämtar lokala ändringar som behöver synkas"""
         try:
-            conn = sqlite3.connect("sync.db")
-            cursor = conn.cursor()
-            
-            cursor.execute('''
-                SELECT sync_id, table_name, record_id, data, timestamp, 
-                       device_id, status, hash
-                FROM sync_log 
-                WHERE status IN (?, ?)
-                ORDER BY timestamp ASC
-            ''', (SyncStatus.PENDING.value, SyncStatus.ERROR.value))
-            
-            changes = []
-            for row in cursor.fetchall():
-                sync_item = SyncItem(
-                    id=row[0],
-                    table_name=row[1],
-                    record_id=row[2],
-                    data=json.loads(row[3]),
-                    timestamp=datetime.fromisoformat(row[4]),
-                    device_id=row[5],
-                    status=SyncStatus(row[6]),
-                    hash=row[7]
-                )
-                changes.append(sync_item)
-            
-            conn.close()
-            return changes
+            with sqlite3.connect("sync.db") as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    SELECT sync_id, table_name, record_id, data, timestamp, 
+                           device_id, status, hash
+                    FROM sync_log 
+                    WHERE status IN (?, ?)
+                    ORDER BY timestamp ASC
+                ''', (SyncStatus.PENDING.value, SyncStatus.ERROR.value))
+                
+                changes = []
+                for row in cursor.fetchall():
+                    sync_item = SyncItem(
+                        id=row[0],
+                        table_name=row[1],
+                        record_id=row[2],
+                        data=json.loads(row[3]),
+                        timestamp=datetime.fromisoformat(row[4]),
+                        device_id=row[5],
+                        status=SyncStatus(row[6]),
+                        hash=row[7]
+                    )
+                    changes.append(sync_item)
+                
+                return changes
             
         except Exception as e:
             print(f"Fel vid hämtning av lokala ändringar: {e}")
@@ -347,28 +345,27 @@ class CloudSyncManager:
             # Här skulle vi normalt uppdatera den lokala databasen
             # För nu loggar vi bara ändringen
             
-            conn = sqlite3.connect("sync.db")
-            cursor = conn.cursor()
-            
-            cursor.execute('''
-                INSERT OR REPLACE INTO sync_log 
-                (sync_id, table_name, record_id, data, timestamp, 
-                 device_id, status, hash, server_timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                change.id,
-                change.table_name,
-                change.record_id,
-                json.dumps(change.data),
-                change.timestamp.isoformat(),
-                change.device_id,
-                SyncStatus.SYNCED.value,
-                change.hash,
-                datetime.now().isoformat()
-            ))
-            
-            conn.commit()
-            conn.close()
+            with sqlite3.connect("sync.db") as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    INSERT OR REPLACE INTO sync_log 
+                    (sync_id, table_name, record_id, data, timestamp, 
+                     device_id, status, hash, server_timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    change.id,
+                    change.table_name,
+                    change.record_id,
+                    json.dumps(change.data),
+                    change.timestamp.isoformat(),
+                    change.device_id,
+                    SyncStatus.SYNCED.value,
+                    change.hash,
+                    datetime.now().isoformat()
+                ))
+                
+                conn.commit()
             
             return True
             
@@ -379,18 +376,17 @@ class CloudSyncManager:
     def mark_changes_synced(self, sync_ids: List[str]):
         """Markerar ändringar som synkroniserade"""
         try:
-            conn = sqlite3.connect("sync.db")
-            cursor = conn.cursor()
-            
-            for sync_id in sync_ids:
-                cursor.execute('''
-                    UPDATE sync_log 
-                    SET status = ?, server_timestamp = ?
-                    WHERE sync_id = ?
-                ''', (SyncStatus.SYNCED.value, datetime.now().isoformat(), sync_id))
-            
-            conn.commit()
-            conn.close()
+            with sqlite3.connect("sync.db") as conn:
+                cursor = conn.cursor()
+                
+                for sync_id in sync_ids:
+                    cursor.execute('''
+                        UPDATE sync_log 
+                        SET status = ?, server_timestamp = ?
+                        WHERE sync_id = ?
+                    ''', (SyncStatus.SYNCED.value, datetime.now().isoformat(), sync_id))
+                
+                conn.commit()
             
         except Exception as e:
             print(f"Fel vid markering av synkroniserade ändringar: {e}")
@@ -405,27 +401,26 @@ class CloudSyncManager:
             sync_id = f"{self.device_id}_{int(time.time() * 1000)}"
             data_hash = hashlib.md5(json.dumps(data, sort_keys=True).encode()).hexdigest()
             
-            conn = sqlite3.connect("sync.db")
-            cursor = conn.cursor()
-            
-            cursor.execute('''
-                INSERT INTO sync_log 
-                (sync_id, table_name, record_id, data, timestamp, 
-                 device_id, status, hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                sync_id,
-                table_name,
-                record_id,
-                json.dumps(data),
-                datetime.now().isoformat(),
-                self.device_id,
-                SyncStatus.PENDING.value,
-                data_hash
-            ))
-            
-            conn.commit()
-            conn.close()
+            with sqlite3.connect("sync.db") as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    INSERT INTO sync_log 
+                    (sync_id, table_name, record_id, data, timestamp, 
+                     device_id, status, hash)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    sync_id,
+                    table_name,
+                    record_id,
+                    json.dumps(data),
+                    datetime.now().isoformat(),
+                    self.device_id,
+                    SyncStatus.PENDING.value,
+                    data_hash
+                ))
+                
+                conn.commit()
             
             return sync_id
             
@@ -436,14 +431,14 @@ class CloudSyncManager:
     def get_sync_status(self) -> Dict:
         """Returnerar synkroniseringsstatus"""
         try:
-            conn = sqlite3.connect("sync.db")
-            cursor = conn.cursor()
-            
-            # Räkna olika status
-            cursor.execute('''
-                SELECT status, COUNT(*) FROM sync_log 
-                GROUP BY status
-            ''')
+            with sqlite3.connect("sync.db") as conn:
+                cursor = conn.cursor()
+                
+                # Räkna olika status
+                cursor.execute('''
+                    SELECT status, COUNT(*) FROM sync_log 
+                    GROUP BY status
+                ''')
             
             status_counts = dict(cursor.fetchall())
             
@@ -575,3 +570,13 @@ def show_sync_status():
     """Visar synkroniseringsstatus"""
     # Här skulle vi normalt visa detaljerad status
     print("Synkroniseringsstatus: Ej implementerad i denna version")
+
+def check_cloud_availability() -> bool:
+    """Kontrollerar om cloud-synkronisering är tillgänglig"""
+    try:
+        # Kontrollera om nätverksanslutning finns
+        import requests
+        response = requests.get("https://httpbin.org/get", timeout=5)
+        return response.status_code == 200
+    except:
+        return False

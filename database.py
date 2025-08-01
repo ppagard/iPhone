@@ -224,7 +224,7 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.execute('''
                 SELECT e.id, e.description, e.amount, e.currency, e.paid_by, 
-                       e.category, e.date, e.created_at
+                       e.category, e.date
                 FROM expenses e
                 WHERE e.group_id = ?
                 ORDER BY e.date DESC
@@ -240,7 +240,6 @@ class DatabaseManager:
                     'paid_by': row[4],
                     'category': row[5],
                     'date': row[6],
-                    'created_at': row[7],
                     'splits': []
                 }
                 

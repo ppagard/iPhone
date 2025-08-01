@@ -19,6 +19,7 @@ schedule==1.2.0
 
 # Offline-valuta (Fas 2)
 # requests ingår redan ovan
+# uuid - ingår vanligtvis i Python-installationen
 
 # Inbyggda Python-moduler (krävs inte installation)
 # tkinter - ingår vanligtvis i Python-installationen

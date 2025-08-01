@@ -24,7 +24,8 @@ def test_database():
         print("✓ Databasmanager skapad")
         
         # Testa grupphantering
-        group_id = db.create_group("Test Grupp")
+        import time
+        group_id = db.create_group(f"Test Grupp {int(time.time())}")
         print(f"✓ Skapade grupp med ID: {group_id}")
         
         groups = db.get_all_groups()

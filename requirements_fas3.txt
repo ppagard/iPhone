@@ -19,7 +19,7 @@ schedule==1.2.0
 
 # Cloud-synkronisering (Fas 3)
 # requests ingår redan ovan
-uuid==1.30
+# uuid - ingår vanligtvis i Python-installationen
 
 # AI och maskininlärning (Fas 3)
 scikit-learn==1.3.2

@@ -264,11 +264,10 @@ class BackupManager:
             
             # Kontrollera att databasen är giltig
             try:
-                conn = sqlite3.connect(db_path)
-                cursor = conn.cursor()
-                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-                tables = cursor.fetchall()
-                conn.close()
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = cursor.fetchall()
                 
                 required_tables = ['groups', 'participants', 'expenses', 'expense_splits']
                 existing_tables = [table[0] for table in tables]

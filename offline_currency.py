@@ -27,34 +27,33 @@ class OfflineCurrencyConverter:
     def setup_database(self):
         """Sätter upp databas för valutakurser"""
         try:
-            conn = sqlite3.connect(self.db_file)
-            cursor = conn.cursor()
-            
-            # Skapa tabell för valutakurser
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS currency_rates (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    from_currency TEXT NOT NULL,
-                    to_currency TEXT NOT NULL,
-                    rate REAL NOT NULL,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    source TEXT DEFAULT 'api'
-                )
-            ''')
-            
-            # Skapa index för snabbare sökningar
-            cursor.execute('''
-                CREATE INDEX IF NOT EXISTS idx_currency_pair 
-                ON currency_rates(from_currency, to_currency)
-            ''')
-            
-            cursor.execute('''
-                CREATE INDEX IF NOT EXISTS idx_timestamp 
-                ON currency_rates(timestamp)
-            ''')
-            
-            conn.commit()
-            conn.close()
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.cursor()
+                
+                # Skapa tabell för valutakurser
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS currency_rates (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        from_currency TEXT NOT NULL,
+                        to_currency TEXT NOT NULL,
+                        rate REAL NOT NULL,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        source TEXT DEFAULT 'api'
+                    )
+                ''')
+                
+                # Skapa index för snabbare sökningar
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_currency_pair 
+                    ON currency_rates(from_currency, to_currency)
+                ''')
+                
+                cursor.execute('''
+                    CREATE INDEX IF NOT EXISTS idx_timestamp 
+                    ON currency_rates(timestamp)
+                ''')
+                
+                conn.commit()
             
         except Exception as e:
             print(f"Fel vid uppsättning av valutadatabas: {e}")
@@ -168,16 +167,15 @@ class OfflineCurrencyConverter:
     def save_rate_to_database(self, from_currency: str, to_currency: str, rate: float, source: str = 'api'):
         """Sparar valutakurs till databas"""
         try:
-            conn = sqlite3.connect(self.db_file)
-            cursor = conn.cursor()
-            
-            cursor.execute('''
-                INSERT INTO currency_rates (from_currency, to_currency, rate, source)
-                VALUES (?, ?, ?, ?)
-            ''', (from_currency, to_currency, rate, source))
-            
-            conn.commit()
-            conn.close()
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    INSERT INTO currency_rates (from_currency, to_currency, rate, source)
+                    VALUES (?, ?, ?, ?)
+                ''', (from_currency, to_currency, rate, source))
+                
+                conn.commit()
             
         except Exception as e:
             print(f"Fel vid sparande av valutakurs till databas: {e}")
@@ -185,23 +183,22 @@ class OfflineCurrencyConverter:
     def get_rate_from_database(self, from_currency: str, to_currency: str, max_age_hours: int = 168) -> Optional[float]:
         """Hämtar valutakurs från databas"""
         try:
-            conn = sqlite3.connect(self.db_file)
-            cursor = conn.cursor()
-            
-            # Hämta senaste kursen inom max_age_hours
-            cutoff_time = datetime.now() - timedelta(hours=max_age_hours)
-            
-            cursor.execute('''
-                SELECT rate, timestamp FROM currency_rates 
-                WHERE from_currency = ? AND to_currency = ? AND timestamp > ?
-                ORDER BY timestamp DESC LIMIT 1
-            ''', (from_currency, to_currency, cutoff_time.isoformat()))
-            
-            result = cursor.fetchone()
-            conn.close()
-            
-            if result:
-                return result[0]
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.cursor()
+                
+                # Hämta senaste kursen inom max_age_hours
+                cutoff_time = datetime.now() - timedelta(hours=max_age_hours)
+                
+                cursor.execute('''
+                    SELECT rate, timestamp FROM currency_rates 
+                    WHERE from_currency = ? AND to_currency = ? AND timestamp > ?
+                    ORDER BY timestamp DESC LIMIT 1
+                ''', (from_currency, to_currency, cutoff_time.isoformat()))
+                
+                result = cursor.fetchone()
+                
+                if result:
+                    return result[0]
             
         except Exception as e:
             print(f"Fel vid hämtning av valutakurs från databas: {e}")
@@ -301,18 +298,16 @@ class OfflineCurrencyConverter:
         
         # Lägg till valutor från databas
         try:
-            conn = sqlite3.connect(self.db_file)
-            cursor = conn.cursor()
-            
-            cursor.execute('SELECT DISTINCT from_currency FROM currency_rates')
-            for row in cursor.fetchall():
-                currencies.add(row[0])
-            
-            cursor.execute('SELECT DISTINCT to_currency FROM currency_rates')
-            for row in cursor.fetchall():
-                currencies.add(row[0])
-            
-            conn.close()
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('SELECT DISTINCT from_currency FROM currency_rates')
+                for row in cursor.fetchall():
+                    currencies.add(row[0])
+                
+                cursor.execute('SELECT DISTINCT to_currency FROM currency_rates')
+                for row in cursor.fetchall():
+                    currencies.add(row[0])
             
         except Exception as e:
             print(f"Fel vid hämtning av valutor från databas: {e}")
@@ -349,27 +344,26 @@ class OfflineCurrencyConverter:
     def get_rate_history(self, from_currency: str, to_currency: str, days: int = 30) -> List[Dict]:
         """Hämtar historik för valutakurs"""
         try:
-            conn = sqlite3.connect(self.db_file)
-            cursor = conn.cursor()
-            
-            cutoff_date = datetime.now() - timedelta(days=days)
-            
-            cursor.execute('''
-                SELECT rate, timestamp, source FROM currency_rates 
-                WHERE from_currency = ? AND to_currency = ? AND timestamp > ?
-                ORDER BY timestamp ASC
-            ''', (from_currency, to_currency, cutoff_date.isoformat()))
-            
-            history = []
-            for row in cursor.fetchall():
-                history.append({
-                    'rate': row[0],
-                    'timestamp': row[1],
-                    'source': row[2]
-                })
-            
-            conn.close()
-            return history
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.cursor()
+                
+                cutoff_date = datetime.now() - timedelta(days=days)
+                
+                cursor.execute('''
+                    SELECT rate, timestamp, source FROM currency_rates 
+                    WHERE from_currency = ? AND to_currency = ? AND timestamp > ?
+                    ORDER BY timestamp ASC
+                ''', (from_currency, to_currency, cutoff_date.isoformat()))
+                
+                history = []
+                for row in cursor.fetchall():
+                    history.append({
+                        'rate': row[0],
+                        'timestamp': row[1],
+                        'source': row[2]
+                    })
+                
+                return history
             
         except Exception as e:
             print(f"Fel vid hämtning av kurshistorik: {e}")
@@ -378,21 +372,20 @@ class OfflineCurrencyConverter:
     def cleanup_old_rates(self, days: int = 90):
         """Rensar gamla valutakurser från databas"""
         try:
-            conn = sqlite3.connect(self.db_file)
-            cursor = conn.cursor()
-            
-            cutoff_date = datetime.now() - timedelta(days=days)
-            
-            cursor.execute('''
-                DELETE FROM currency_rates 
-                WHERE timestamp < ?
-            ''', (cutoff_date.isoformat(),))
-            
-            deleted_count = cursor.rowcount
-            conn.commit()
-            conn.close()
-            
-            print(f"Tog bort {deleted_count} gamla valutakurser")
+            with sqlite3.connect(self.db_file) as conn:
+                cursor = conn.cursor()
+                
+                cutoff_date = datetime.now() - timedelta(days=days)
+                
+                cursor.execute('''
+                    DELETE FROM currency_rates 
+                    WHERE timestamp < ?
+                ''', (cutoff_date.isoformat(),))
+                
+                deleted_count = cursor.rowcount
+                conn.commit()
+                
+                print(f"Tog bort {deleted_count} gamla valutakurser")
             
         except Exception as e:
             print(f"Fel vid rensning av gamla kurser: {e}")
